@@ -1,0 +1,230 @@
+
+"""
+Includes:
+
+PlaneNets (ПлейнНэт) from Synergetics for A, B, E, T, S
+Koski breakdowns of some shapes in E and S vols with phi scaling
+
+Quirky names tentative; helpful mnemonics continued informing our work
+http://coffeeshopsnet.blogspot.com/2015/07/mind-gap.html
+
+First shared in 2014 while ramping up to OSCON wherein our school had
+a booth, with our theme being i18n ("internationalization")
+https://mail.python.org/pipermail/edu-sig/2014-May/011026.html
+
+Euler volume, modified by Gerald de Jong
+http://www.grunch.net/synergetics/quadvols.html
+Kirby Urner (c) MIT License
+
+Министерство Глупых Походок
+Министерство образования
+"""
+
+from math import sqrt, hypot  # sqrt: квадратный_корень
+
+class ПлейнНэт:
+    """Любой шесть край тет в шаблоне описано в API нот"""
+
+    def __init__(self, oa, ob, oc, ab, bc, ca):
+        self.oa = oa
+        self.ob = ob
+        self.oc = oc
+        self.ab = ab
+        self.bc = bc
+        self.ca = ca
+
+class Тетраэдр:
+    """
+    Займет шесть края тетраэдра с лицами
+    (а, б, г) (б, в, д) (с, а, е) (д, д, е) - объем возвращается
+    если IVM и XYZ
+    """
+
+    def __init__(self, a,b,c,d,e,f):
+        self.a, self.a2 = a, a**2
+        self.b, self.b2 = b, b**2
+        self.c, self.c2 = c, c**2
+        self.d, self.d2 = d, d**2
+        self.e, self.e2 = e, e**2
+        self.f, self.f2 = f, f**2
+
+    def ivm_объем(self):
+        return ((self._addopen()- self._addclosed() - self._addopposite())/2) ** 0.5
+
+    def xyz_объем(self):
+        return sqrt(8/9) * self.ivm_volume()
+
+    def _addopen(self):
+        a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
+        sumval = f2*a2*b2
+        sumval +=  d2 * a2 * c2
+        sumval +=  a2 * b2 * e2
+        sumval +=  c2 * b2 * d2
+        sumval +=  e2 * c2 * a2
+        sumval +=  f2 * c2 * b2
+        sumval +=  e2 * d2 * a2
+        sumval +=  b2 * d2 * f2
+        sumval +=  b2 * e2 * f2
+        sumval +=  d2 * e2 * c2
+        sumval +=  a2 * f2 * e2
+        sumval +=  d2 * f2 * c2
+        return sumval
+
+    def _addclosed(self):
+        a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
+        sumval =   a2 * b2 * d2
+        sumval +=  d2 * e2 * f2
+        sumval +=  b2 * c2 * e2
+        sumval +=  a2 * c2 * f2
+        return sumval
+
+    def _addopposite(self):
+        a2,b2,c2,d2,e2,f2 = self.a2, self.b2, self.c2, self.d2, self.e2, self.f2
+        sumval =  a2 * e2 * (a2 + e2)
+        sumval += b2 * f2 * (b2 + f2)
+        sumval += c2 * d2 * (c2 + d2)
+        return sumval
+
+
+φ = sqrt(5)/2 + 0.5
+D = 1.0
+R = D/2
+
+def объем(net):
+    return Тетраэдр(net.oa, net.ob, net.oc, net.ab, net.bc, net.ca).ivm_объем()
+
+# Fig. 913.01 A Quanta Module
+# http://www.rwgrayprojects.com/synergetics/s09/figs/f1301.html
+
+a = D
+EF = a * sqrt(6) / 12
+EC = a * sqrt(6) / 4
+ED = a * sqrt(2) / 4
+FC = a * sqrt(3) / 3
+CD = a/2
+DF = a * sqrt(3) / 6
+
+Amod = ПлейнНэт(EF, EC, ED, FC, CD, DF)
+Avol = объем(Amod)
+print("Amod volume = :", Avol)
+
+# Fig. 916.01 B Quanta Module
+# http://www.rwgrayprojects.com/synergetics/s09/figs/f1601.html
+
+a = D
+EA = a * sqrt(2) / 2
+EC = a/2
+EB = a * sqrt(6) / 12
+AC = a/2
+CB = a * sqrt(2) / 4
+BA = a * sqrt(6) / 4
+
+Bmod = ПлейнНэт(EA, EC, EB, AC, CB, BA)
+Bvol = объем(Bmod)
+print("Bmod volume = :", Bvol)
+
+# Fig. 986.411A T & E Module
+# http://www.rwgrayprojects.com/synergetics/s09/figs/f86411a.html
+
+h = R
+OC = h
+OA = h * sqrt((5 - sqrt(5))/2)
+OB = h * sqrt((9 - 3 * sqrt(5))/2 )
+CA = (h/2) * (sqrt(5) - 1)
+AB = h * sqrt(5 - 2 * sqrt(5))
+BC = (h/2) * (3 - sqrt(5))
+
+Emod = ПлейнНэт(OC, OA, OB, CA, AB, BC)
+Evol = объем(Emod)
+print("Emod volume = :", Evol)
+
+# Fig. 986.411A T & E Module
+# http://www.rwgrayprojects.com/synergetics/s09/figs/f86411a.html
+
+h = R * pow(2/3,1/3) * (φ / sqrt(2))
+OC = h
+OA = h * sqrt((5 - sqrt(5))/2)
+OB = h * sqrt((9 - 3 * sqrt(5))/2 )
+CA = (h/2) * (sqrt(5) - 1)
+AB = h * sqrt(5 - 2 * sqrt(5))
+BC = (h/2) * (3 - sqrt(5))
+
+Tmod = ПлейнНэт(OC, OA, OB, CA, AB, BC)
+Tvol = объем(Tmod)
+print("Tmod volume = :", Tvol)
+
+
+# Fig. 988.13A S Quanta Module Edge Lengths
+# http://www.rwgrayprojects.com/synergetics/s09/figs/f8813a.html
+
+a = D
+FG = (a/2) * sqrt(3) * sqrt(7-3*sqrt(5))
+FE = a * sqrt(7 - 3*sqrt(5))
+FH = (a/2) * (sqrt(5)-1)
+GE = (a/2) * sqrt(7 - 3*sqrt(5))
+EH = (a/2) * (3 - sqrt(5))
+HG = (a/2) * sqrt (7 - 3*sqrt(5))
+
+Smod = ПлейнНэт(FG, FE, FH, GE, EH, HG)
+Svol = объем(Smod)
+print("Smod volume = :", Svol)  # φ**=5 / 2
+
+print("================")
+
+sFactor = Svol / Evol
+
+s3 = Svol * pow(φ, -3)
+s6 = Svol * pow(φ, -6)
+e3 = Evol * pow(φ, -3)
+E3 = Evol * pow(φ, 3)
+print("sFactor (Svol/Evol) =   ", sFactor)
+
+print("================")
+
+BUvol = (20 * sFactor ** 2)
+LUvol = BUvol/8  # 60 * S + 20 * s3
+
+print("BigUgly:                {:10.7f}".format(BUvol))
+print("SuperRT:                {:10.7f}".format(120 * E3))  # ромбические триаконтаэдра
+# print("Unknown:              {:10.7f}".format(20 * sFactor **  1))
+print("VE    (edge 2):         {:10.7f}".format(20 * sFactor **  0)) #  420 * Svol + 100 * s3
+print("Icosa (edge 2):         {:10.7f}".format(20 * sFactor ** -1)) #  420 * Evol + 100 * e3
+print("Unknown:                {:10.7f}".format(20 * sFactor ** -2)) #  360 * Svol +  85 * s3
+print("SmallGuy:               {:10.7f}".format(20 * sFactor ** -3)) #  360 * Evol +  85 * e3
+print("RD6:                    {:10.7f}".format((2*Avol + Bvol) * 4 * 12))
+print("RT5+:                   {:10.7f}".format(120 * Evol)) # ромбические триаконтаэдра
+print("RT5:                    {:10.7f}".format(120 * Tvol)) # ромбические триаконтаэдра
+print("октаэдр (edge 2):       {:10.7f}".format((Avol + Bvol) * 6 * 8)) # 6 ABs per face
+print("LittleUgly + 24 Smods:  {:10.7f}".format(LUvol + 24 * Svol))
+print("куб:                    {:10.7f}".format(267* s3 + 63 * s6)) # Тетраэдр + 6 1/8 октаэдр
+print("LittleUgly:             {:10.7f}".format(LUvol))
+print("VE faces in LittleUgly: {:10.7f}".format(LUvol * sFactor**-2))
+print("Тетраэдр:               {:10.7f}".format( 21 * Svol + 5 * s3))
+
+import unittest
+
+class Test_Tetrahedron(unittest.TestCase):
+
+    def test_unit_volume(self):
+        tet = Тетраэдр(D, D, D, D, D, D).ivm_объем()
+        self.assertAlmostEqual(tet, 1.0)
+
+    def test_unit_volume2(self):
+        tet = Тетраэдр(R, R, R, R, R, R).xyz_объем()
+        self.assertAlmostEqual(tet, 0.1178511)
+
+    def test_phi_edge_tetra(self):
+        tet = Тетраэдр(D, D, D, D, D, φ )
+        self.assertAlmostEqual(tet.ivm_объем(), 0.70710678)
+
+    def test_right_tetra(self):
+        e = hypot(sqrt(3)/2, sqrt(3)/2)  # right Тетраэдр
+        tet = Тетраэдр(D, D, D, D, D, e).xyz_объем()
+        self.assertAlmostEqual(tet, 1.0)
+
+    def test_smod_volume(self):
+        svol = 0.5 * φ**-5
+        self.assertAlmostEqual(Svol, svol)
+
+if __name__ == "__main__":
+    unittest.main()
